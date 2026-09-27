@@ -16,13 +16,13 @@ A personal, publicly hosted (but not indexed) cookbook website backed by a GitHu
 - Related recipes, "Surprise Me", featured and recently-added lists
 - Mobile-first layout, light/dark mode
 - Recipe schema with build-time validation
-- Claude workflow: `add-recipe` and `update-recipe` project skills, CLAUDE.md rules, image processing script, inbox folder
+- Claude workflow: `add-recipe` and `update-recipe` project skills, CLAUDE.md rules, image processing script, inbox folder, recipe import from a URL
 - GitHub repo + GitHub Pages deploy via Actions
 - `noindex` meta tag + `robots.txt` disallow
 
 ### Out of scope (deferred)
 
-Grocery lists, meal planning, printable cards/PDF, nutrition, cooked-this tracking, favorites, URL import, voice input, private recipes, pantry tracking, recommendations, shared/family cookbook.
+Grocery lists, meal planning, printable cards/PDF, nutrition, cooked-this tracking, favorites, voice input, private recipes, pantry tracking, recommendations, shared/family cookbook.
 
 ## 2. Decisions
 
@@ -38,6 +38,7 @@ Grocery lists, meal planning, printable cards/PDF, nutrition, cooked-this tracki
 | Photo intake | Git-ignored `inbox/` folder | Pasted images aren't reliably available as files |
 | Image processing | `sharp` script: rotate, ≤1600px wide, WebP ~q80, strip EXIF/GPS | Small repo, fast pages, no location leak in public repo |
 | Authoring interface | Claude Code with project skills | User's stated preference |
+| URL import | `scripts/fetch-recipe.mjs` extracts schema.org `Recipe` JSON-LD; WebFetch fallback | Most recipe sites embed exact structured data; avoids lossy summaries
 
 **Site URL:** `https://jo714011.github.io/personal-cookbook/`
 
@@ -189,6 +190,7 @@ components/site-header.tsx, components/theme-toggle.tsx
 scripts/
   validate.ts      # npm run validate
   process-image.mjs
+  fetch-recipe.mjs # URL → JSON-LD Recipe; exports pure extractRecipe(html) for tests
   prebuild.ts      # copy images + write search index
 ```
 
@@ -209,10 +211,15 @@ A warm, editorial cookbook feel: a serif display face for titles, a clean sans f
 - `CLAUDE.md`: points to the schema and skills and states the rules below so they apply even without invoking a skill. It keeps the existing `AGENTS.md` Next.js note.
 - `scripts/process-image.mjs <input> <output.webp>`: auto-rotate, resize to ≤1600px wide (no upscaling), WebP q80, strip all metadata including GPS.
 - `npm run validate`: loads and validates all recipes; non-zero exit and a clear per-file error on failure.
+- `scripts/fetch-recipe.mjs <url>`: fetches the page with a normal browser User-Agent, finds `<script type="application/ld+json">` blocks, locates the schema.org `Recipe` object (including inside `@graph` arrays or lists), and prints it as JSON: name, description, `recipeIngredient`, `recipeInstructions` (flattening `HowToSection`/`HowToStep`), `recipeYield`, `prepTime`/`cookTime`/`totalTime` (ISO 8601 durations), `recipeCategory`, `recipeCuisine`, `keywords`, `image`, author, and the canonical URL. It exits non-zero with a clear message if the fetch fails or no Recipe object is found.
 
 ### Add flow
 
-1. **Gather:** read all files in `inbox/` plus the user's text. Multiple inputs combine into one recipe unless the user says otherwise.
+1. **Gather:** read all files in `inbox/`, the user's text, and any URLs. Multiple inputs combine into one recipe unless the user says otherwise.
+   - **URL input:** run `scripts/fetch-recipe.mjs`. If it finds no structured data (or the site blocks it), fall back to WebFetch on the page. If that fails too (paywall, login, bot protection), ask the user to paste the recipe text or drop screenshots in `inbox/`.
+   - Parse ingredient strings (`"1 1/2 cups flour, sifted"`) into `{ qty, unit, item, note }`. Convert ISO durations to minutes. Map site categories/keywords onto the fixed categories and kebab-case tags.
+   - Set `source: { type: web, name: <site or author>, url: <canonical URL> }`, or `type: adapted` if the user asks for changes on import.
+   - **Public-repo content rules:** ingredient lists and quantities are copied faithfully, but instructions are **rewritten in Claude's own words** (same steps, same temperatures and times), and the description is original rather than the site's text. The site's photo is **not** downloaded or committed: the recipe uses the placeholder until the user adds their own photo. The source link on the recipe page credits the original.
 2. **Extract/develop:** transcribe, reconstruct, or develop the recipe.
 3. **Clarify:** if something important is missing (servings, key quantities, oven temperature/time), ask in **one batch** of questions. Minor gaps are filled with sensible estimates and **flagged as estimates in Notes**. Family and cookbook transcriptions are never silently altered; suggested changes go under Variations.
 4. **Preview:** show the title, slug, categories/tags, ingredients, a condensed version of the steps, and the chosen hero photo. Wait for approval.
@@ -239,7 +246,7 @@ Locate the recipe (fuzzy match; ask if ambiguous) → apply the change and set `
 
 ## 7. Testing
 
-- **Vitest unit tests:** schema (valid and invalid fixtures, including a bad category, a missing Instructions section, and an unknown H2), fraction formatting and scaling, query parsing and AND-matching (including a fuzzy typo case), related-recipe ranking, and basePath URL helper.
+- **Vitest unit tests:** schema (valid and invalid fixtures, including a bad category, a missing Instructions section, and an unknown H2), fraction formatting and scaling, query parsing and AND-matching (including a fuzzy typo case), related-recipe ranking, basePath URL helper, and `extractRecipe` against saved HTML fixtures (plain Recipe, `@graph`-nested, `HowToSection` instructions, and a page with no Recipe).
 - **Build:** `npm run build` succeeds with the seed recipes; an invalid fixture makes `validate` fail.
 - **Manual:** the dev server plus a browser check of the home, recipe, all-recipes/search, category, tag and 404 pages, the scaler, Surprise Me, dark mode, and a mobile viewport. After deploy, confirm the live site loads with correct asset paths and the noindex tag.
 
@@ -251,5 +258,6 @@ Locate the recipe (fuzzy match; ask if ambiguous) → apply the change and set `
 
 1. The site is live at `https://jo714011.github.io/personal-cookbook/` with the noindex meta tag and robots.txt.
 2. The user drops a photo into `inbox/`, asks Claude to add it, approves the preview, and the recipe appears on the live site after deploy.
-3. Search (including multi-term ingredient queries), the servings scaler, the category/tag pages and Surprise Me all work on a phone.
-4. `npm run validate`, `npm test` and `npm run build` all pass, both locally and in CI.
+3. The user gives Claude a recipe URL from a major recipe site, and it is imported with exact ingredients, rewritten instructions, a source credit link, and no copied photo.
+4. Search (including multi-term ingredient queries), the servings scaler, the category/tag pages and Surprise Me all work on a phone.
+5. `npm run validate`, `npm test` and `npm run build` all pass, both locally and in CI.
