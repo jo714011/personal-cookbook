@@ -4,13 +4,17 @@ import { RecipeGrid } from "@/components/recipe/recipe-grid"
 import { getAllRecipes } from "@/lib/recipes"
 import { tagCounts } from "@/lib/recipes/collections"
 import { toSummary } from "@/lib/recipes/summary"
+import { orPlaceholder } from "@/lib/recipes/static-params"
 
 type Props = { params: Promise<{ tag: string }> }
 
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return tagCounts(getAllRecipes().map(toSummary)).map(({ tag }) => ({ tag }))
+  return orPlaceholder(
+    tagCounts(getAllRecipes().map(toSummary)).map(({ tag }) => ({ tag })),
+    "tag"
+  )
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

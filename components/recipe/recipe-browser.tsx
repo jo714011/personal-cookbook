@@ -22,7 +22,16 @@ export function RecipeBrowser({ recipes, categories, tags }: Props) {
   const searchParams = useSearchParams()
   const category = searchParams.get("category") ?? undefined
   const tag = searchParams.get("tag") ?? undefined
-  const [query, setQuery] = useState(searchParams.get("q") ?? "")
+  const urlQuery = searchParams.get("q") ?? ""
+  const [query, setQuery] = useState(urlQuery)
+  const [syncedUrlQuery, setSyncedUrlQuery] = useState(urlQuery)
+
+  // Follow the URL when it changes from outside the input (header link, back/forward),
+  // without clobbering in-progress typing (the URL holds the trimmed query).
+  if (urlQuery !== syncedUrlQuery) {
+    setSyncedUrlQuery(urlQuery)
+    if (urlQuery !== query.trim()) setQuery(urlQuery)
+  }
 
   function update(next: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString())

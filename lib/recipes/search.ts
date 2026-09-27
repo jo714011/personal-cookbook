@@ -43,7 +43,8 @@ export function searchRecipes(
 
   let totals: Map<string, number> | undefined
   for (const term of terms) {
-    const threshold = term.length <= 4 ? 0 : term.length <= 6 ? 0.15 : 0.3
+    // Fuse scores ≈ errors / term length: 0.25 allows one typo in 4+ letters, not two in 7
+    const threshold = term.length <= 4 ? 0 : 0.25
     const scores = new Map(
       fuseFor(threshold)
         .search(term)

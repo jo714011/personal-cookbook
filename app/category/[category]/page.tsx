@@ -5,15 +5,19 @@ import { getAllRecipes } from "@/lib/recipes"
 import { CATEGORY_LABELS, isCategory } from "@/lib/recipes/categories"
 import { categoryCounts } from "@/lib/recipes/collections"
 import { toSummary } from "@/lib/recipes/summary"
+import { orPlaceholder } from "@/lib/recipes/static-params"
 
 type Props = { params: Promise<{ category: string }> }
 
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return categoryCounts(getAllRecipes().map(toSummary)).map(({ category }) => ({
-    category,
-  }))
+  return orPlaceholder(
+    categoryCounts(getAllRecipes().map(toSummary)).map(({ category }) => ({
+      category,
+    })),
+    "category"
+  )
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

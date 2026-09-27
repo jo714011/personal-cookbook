@@ -82,6 +82,24 @@ describe("searchRecipes", () => {
     ])
   })
 
+  it("tolerates one typo in 5–6 letter terms", () => {
+    expect(slugs(searchRecipes(items, "chiken"))).toEqual(
+      expect.arrayContaining(["fried-rice", "tacos"])
+    )
+    expect(slugs(searchRecipes(items, "tacoes"))).toEqual(["tacos"])
+  })
+
+  it("does not fuzzy-match longer terms to different words (cookies ≠ cooked)", () => {
+    const withCookies = [
+      ...items,
+      recipe("cookies", {
+        title: "Chocolate Chip Cookies",
+        categories: ["dessert"],
+      }),
+    ]
+    expect(slugs(searchRecipes(withCookies, "cookies"))).toEqual(["cookies"])
+  })
+
   it("returns nothing when any term matches nothing", () => {
     expect(searchRecipes(items, "chicken + zzzqqq")).toEqual([])
   })

@@ -116,3 +116,39 @@ describe("extractRecipe", () => {
     expect(extractRecipe("<html><body>No JSON-LD</body></html>")).toBeNull()
   })
 })
+
+describe("extractRecipe with HTML inside JSON-LD strings", () => {
+  const htmlRecipe = (over: Record<string, unknown>) =>
+    extractRecipe(
+      page(JSON.stringify({ "@type": "Recipe", name: "X", ...over }))
+    )!
+
+  it("splits HTML paragraph instructions into separate steps", () => {
+    const r = htmlRecipe({
+      recipeInstructions: "<p>Step one</p><p>Step two</p>",
+    })
+    expect(r.instructions).toEqual([{ steps: ["Step one", "Step two"] }])
+  })
+
+  it("keeps words apart where tags separated them", () => {
+    const r = htmlRecipe({
+      recipeIngredient: ["salt<br>pepper", "1 <b>cup</b>flour"],
+    })
+    expect(r.ingredients).toEqual(["salt pepper", "1 cup flour"])
+  })
+
+  it("decodes common named entities", () => {
+    const r = htmlRecipe({
+      recipeIngredient: ["&frac12; cup milk", "Bake at 350&deg;F"],
+    })
+    expect(r.ingredients).toEqual(["½ cup milk", "Bake at 350°F"])
+  })
+
+  it("never emits markup that was hidden behind entities", () => {
+    const r = htmlRecipe({
+      description: "Tasty &lt;img src=x onerror=alert(1)&gt; pie",
+    })
+    expect(r.description).not.toMatch(/</)
+    expect(r.description).toBe("Tasty pie")
+  })
+})

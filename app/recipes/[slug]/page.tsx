@@ -13,6 +13,7 @@ import { renderMarkdown } from "@/lib/recipes/body"
 import { CATEGORY_LABELS } from "@/lib/recipes/categories"
 import { sourceLabel } from "@/lib/recipes/format"
 import { relatedRecipes } from "@/lib/recipes/related"
+import { orPlaceholder } from "@/lib/recipes/static-params"
 import { toSummary } from "@/lib/recipes/summary"
 import { recipeImageUrl } from "@/lib/site"
 
@@ -21,7 +22,10 @@ type Props = { params: Promise<{ slug: string }> }
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return getAllRecipes().map((r) => ({ slug: r.slug }))
+  return orPlaceholder(
+    getAllRecipes().map((r) => ({ slug: r.slug })),
+    "slug"
+  )
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

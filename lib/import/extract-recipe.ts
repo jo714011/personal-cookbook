@@ -28,22 +28,52 @@ const ENTITIES: Record<string, string> = {
   apos: "'",
   nbsp: " ",
   "#39": "'",
+  frac12: "½",
+  frac13: "⅓",
+  frac23: "⅔",
+  frac14: "¼",
+  frac34: "¾",
+  frac18: "⅛",
+  deg: "°",
+  ndash: "–",
+  mdash: "—",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+  hellip: "…",
+  times: "×",
+}
+
+const LINE_BREAK = /<(?:br\s*\/?|\/p|\/li|\/div|\/h[1-6])\s*>/gi
+const TAG = /<[^>]*>/g
+
+function decodeEntities(text: string): string {
+  return text.replace(/&(#x?[0-9a-f]+|\w+);/gi, (match, code: string) => {
+    if (ENTITIES[code]) return ENTITIES[code]
+    if (code.startsWith("#x"))
+      return String.fromCodePoint(parseInt(code.slice(2), 16))
+    if (code.startsWith("#"))
+      return String.fromCodePoint(parseInt(code.slice(1), 10))
+    return match
+  })
+}
+
+// Block-level tags become line breaks, other tags become spaces. Tags are stripped again
+// after decoding so markup hidden behind entities (&lt;img&gt;) never survives.
+function htmlToLines(value: string): string[] {
+  const text = decodeEntities(
+    value.replace(LINE_BREAK, "\n").replace(TAG, " ")
+  ).replace(TAG, " ")
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
 }
 
 function clean(value: unknown): string {
   if (typeof value !== "string") return ""
-  return value
-    .replace(/<[^>]*>/g, "")
-    .replace(/&(#x?[0-9a-f]+|\w+);/gi, (match, code: string) => {
-      if (ENTITIES[code]) return ENTITIES[code]
-      if (code.startsWith("#x"))
-        return String.fromCodePoint(parseInt(code.slice(2), 16))
-      if (code.startsWith("#"))
-        return String.fromCodePoint(parseInt(code.slice(1), 10))
-      return match
-    })
-    .replace(/\s+/g, " ")
-    .trim()
+  return htmlToLines(value).join(" ")
 }
 
 function list(value: unknown): unknown[] {
@@ -84,7 +114,7 @@ function stepText(step: unknown): string {
 
 function instructions(value: unknown): ExtractedRecipe["instructions"] {
   if (typeof value === "string") {
-    const steps = value.split(/\r?\n/).map(clean).filter(Boolean)
+    const steps = htmlToLines(value)
     return steps.length ? [{ steps }] : []
   }
   const result: ExtractedRecipe["instructions"] = []
