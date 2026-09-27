@@ -23,18 +23,31 @@ export function searchRecipes(
   const terms = parseQuery(query)
   if (terms.length === 0) return items
 
-  const fuse = new Fuse(items, {
-    keys: KEYS,
-    includeScore: true,
-    threshold: 0.3,
-    ignoreLocation: true,
-    minMatchCharLength: 2,
-  })
+  // Short terms fuzzy-match too eagerly ("rice" ≈ "dice"), so fuzziness grows with length
+  const fuses = new Map<number, Fuse<RecipeSummary>>()
+  const fuseFor = (threshold: number) => {
+    if (!fuses.has(threshold)) {
+      fuses.set(
+        threshold,
+        new Fuse(items, {
+          keys: KEYS,
+          includeScore: true,
+          threshold,
+          ignoreLocation: true,
+          minMatchCharLength: 2,
+        })
+      )
+    }
+    return fuses.get(threshold)!
+  }
 
   let totals: Map<string, number> | undefined
   for (const term of terms) {
+    const threshold = term.length <= 4 ? 0 : term.length <= 6 ? 0.15 : 0.3
     const scores = new Map(
-      fuse.search(term).map((r) => [r.item.slug, 1 - (r.score ?? 1)])
+      fuseFor(threshold)
+        .search(term)
+        .map((r) => [r.item.slug, 1 - (r.score ?? 1)])
     )
     totals = totals
       ? new Map(

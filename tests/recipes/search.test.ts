@@ -68,6 +68,20 @@ describe("searchRecipes", () => {
     ])
   })
 
+  it("does not fuzzy-match short terms to near-miss words (rice ≠ diced)", () => {
+    const withDiced = [
+      ...items,
+      recipe("chile-tacos", {
+        title: "Chile Tacos",
+        tags: ["spicy", "chicken"],
+        ingredients: ["diced green chiles", "corn tortillas"],
+      }),
+    ]
+    expect(slugs(searchRecipes(withDiced, "chicken + rice + spicy"))).toEqual([
+      "fried-rice",
+    ])
+  })
+
   it("returns nothing when any term matches nothing", () => {
     expect(searchRecipes(items, "chicken + zzzqqq")).toEqual([])
   })
