@@ -1,21 +1,18 @@
-# Next.js template
+# Personal Cookbook
 
-This is a Next.js template with shadcn/ui.
+A living, searchable cookbook at https://jo714011.github.io/personal-cookbook/ (not indexed by search engines).
 
-## Adding components
+Recipes are Markdown files in `content/recipes/<slug>/index.md`, written and edited through Claude Code:
 
-To add components to your app, run the following command:
+- Drop photos into `inbox/` and say "add the recipe from the inbox".
+- Paste a recipe, describe something you cooked, share an idea, or give a URL.
+- "Add a note to the tacos: more chipotle next time."
 
-```bash
-npx shadcn@latest add button
-```
+See `CLAUDE.md` for the recipe format and workflow. Every push to `main` deploys through GitHub Actions.
 
-This will place the ui components in the `components` directory.
+## Development
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+    npm install
+    npm run dev        # http://localhost:3000/personal-cookbook/
+    npm run validate   # check recipe files
+    npm test
