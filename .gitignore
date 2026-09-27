@@ -34,3 +34,8 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cookbook
+/inbox/*
+!/inbox/.gitkeep
+/public/recipe-images/
