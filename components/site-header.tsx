@@ -9,12 +9,12 @@ export function SiteHeader() {
   const slugs = getAllRecipes().map((r) => r.slug)
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 py-2">
         <Link
           href="/"
-          className="mr-auto flex items-center gap-2 font-heading text-lg font-semibold"
+          className="mr-auto flex items-center gap-2.5 font-heading text-lg font-semibold"
         >
-          <ChefHat className="size-5 text-primary" aria-hidden />
+          <ChefHat className="size-6 text-primary" aria-hidden />
           {SITE_NAME}
         </Link>
         <Link
