@@ -35,11 +35,16 @@ export function ServingsScaler({ value, base, onChange }: Props) {
       >
         <Plus />
       </Button>
-      {value !== base && (
-        <Button variant="link" size="sm" onClick={() => onChange(base)}>
-          Reset
-        </Button>
-      )}
+      {/* Always rendered so the scaler keeps a constant width; hidden at the default. */}
+      <Button
+        variant="link"
+        size="sm"
+        className={value === base ? "invisible" : undefined}
+        disabled={value === base}
+        onClick={() => onChange(base)}
+      >
+        Reset
+      </Button>
     </div>
   )
 }
