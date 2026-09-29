@@ -2,6 +2,8 @@
 title: Butter Chicken
 description: Tender pan-fried chicken simmered in a silky, mildly sweet tomato and cashew gravy finished with butter and cream. A restaurant-style Indian classic you can make at home.
 date: 2026-09-28
+updated: 2026-09-28
+image: hero.webp
 servings: 4
 time: { prep: 25, cook: 45, total: 70 }
 difficulty: medium
