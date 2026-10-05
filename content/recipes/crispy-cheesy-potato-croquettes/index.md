@@ -2,6 +2,8 @@
 title: Crispy Cheesy Potato Croquettes
 description: Soft, seasoned mashed potato wrapped around a cube of mozzarella, then pan-fried until golden and crisp outside with a gooey center.
 date: 2026-10-05
+updated: 2026-10-05
+image: hero.webp
 servings: 14
 time: { prep: 30, cook: 30, total: 60 }
 difficulty: medium
