@@ -17,7 +17,7 @@ title: Green Chile Chicken Tacos
 description: One or two original sentences.
 date: 2026-09-27               # date added, YYYY-MM-DD
 updated: 2026-10-02            # optional; set on meaningful edits
-image: hero.webp               # optional; file in the same folder
+image: hero.webp               # optional; file in the same folder, or an https:// URL
 servings: 4                    # integer; base for the scaler
 time: { prep: 15, cook: 30, total: 45 }   # minutes; any subset
 difficulty: easy               # easy | medium | hard
@@ -50,8 +50,9 @@ Rules:
 - Only the three H2 headings above are allowed. No text before `## Instructions`.
 - The slug (folder name) is kebab-case from the title and **never changes** after publishing, because it's the URL.
 - Before assuming a tag, check the tags already in use (`grep -rh "^tags:" content/recipes`) and reuse them rather than inventing near-duplicates.
-- Images: always go through `npm run image -- <input> content/recipes/<slug>/<name>.webp` (resizes and strips GPS/EXIF). Never commit raw photos. `inbox/` is git-ignored.
-- Content from other sites (URL imports, cookbooks): copy ingredients and quantities exactly, but **rewrite instructions and the description in your own words** (same steps, temperatures, and times). Never download or commit the site's photos.
+- Local images: always go through `npm run image -- <input> content/recipes/<slug>/<name>.webp` (resizes and strips GPS/EXIF). Never commit raw photos. `inbox/` is git-ignored.
+- Remote images: when the user supplies an image link, set `image:` to that `https://` URL instead of downloading it (no file in the folder). Never download or commit a site's photos on your own; only use a remote image when the user gives the link.
+- Content from other sites (URL imports, cookbooks): copy ingredients and quantities exactly, but **rewrite instructions and the description in your own words** (same steps, temperatures, and times). Don't download or commit the site's photos (see Remote images above).
 - Family and handwritten recipes: transcribe faithfully. Don't "improve" them silently; put suggestions under `## Variations`. Put guesses for illegible or missing values in `## Notes`, marked "(estimated)", after asking the user about anything important.
 - Recipes tagged `sample` are seed content and can be deleted once real recipes exist.
 
