@@ -48,11 +48,15 @@ export const recipeFrontmatterSchema = z
     date: isoDate,
     updated: isoDate.optional(),
     image: z
-      .string()
-      .regex(
-        /^[\w-]+\.(webp|jpe?g|png)$/i,
-        "must be a filename in the recipe folder"
-      )
+      .union([
+        z
+          .string()
+          .regex(
+            /^[\w-]+\.(webp|jpe?g|png)$/i,
+            "must be a filename in the recipe folder"
+          ),
+        z.url({ protocol: /^https$/ }),
+      ])
       .optional(),
     servings: z.number().int().positive(),
     time: z

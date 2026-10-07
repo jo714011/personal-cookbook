@@ -2,7 +2,7 @@
 title: Tomato-Basil Pork Chops and Snap Peas
 description: Bone-in pork chops baked on a sheet pan, topped with melty mozzarella, peppery arugula, balsamic glaze, and a fresh tomato-basil salsa, with charred snap peas alongside.
 date: 2026-10-06
-image: hero.webp
+image: "https://tasteofthesouthmagazine.com/wp-content/uploads/2019/03/CapresePorkChop-sheet-pan-web.jpg"
 servings: 4
 time: { prep: 10, cook: 20, total: 30 }
 difficulty: easy

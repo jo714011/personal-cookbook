@@ -7,6 +7,11 @@ export function assetUrl(path: string): string {
   return `${BASE_PATH}${path.startsWith("/") ? path : `/${path}`}`
 }
 
+export function isRemoteImage(image: string): boolean {
+  return /^https:\/\//i.test(image)
+}
+
 export function recipeImageUrl(slug: string, file: string): string {
+  if (isRemoteImage(file)) return file
   return assetUrl(`/recipe-images/${slug}/${file}`)
 }

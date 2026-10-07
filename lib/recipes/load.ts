@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import matter from "gray-matter"
+import { isRemoteImage } from "../site"
 import { parseBody, type RecipeSections } from "./body"
 import {
   formatIssues,
@@ -65,7 +66,11 @@ export function loadRecipes(dir: string = RECIPES_DIR): Recipe[] {
     if (!body.ok) {
       problems.push(...body.errors.map((m) => `${where}: ${m}`))
     }
-    if (frontmatter.success && frontmatter.data.image) {
+    if (
+      frontmatter.success &&
+      frontmatter.data.image &&
+      !isRemoteImage(frontmatter.data.image)
+    ) {
       if (!fs.existsSync(path.join(dir, slug, frontmatter.data.image))) {
         problems.push(
           `${where}: image "${frontmatter.data.image}" not found in recipe folder`
