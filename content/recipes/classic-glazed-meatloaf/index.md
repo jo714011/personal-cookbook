@@ -2,6 +2,7 @@
 title: Classic Glazed Meatloaf
 description: A tender, juicy beef meatloaf kept moist with a milk-soaked panko panade and finished with a sweet-tangy brown sugar ketchup glaze.
 date: 2026-11-12
+image: hero.webp
 servings: 8
 time: { prep: 15, cook: 60, total: 85 }
 difficulty: easy
